@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Controller
 public class WebController {
@@ -66,35 +68,32 @@ public class WebController {
 
         model.addAttribute("username", session.getAttribute("username"));
 
-        // Read actual database records first.
+        // Use saved database records when available.
         var actualDetections =
                 detections.findAllByOrderByDetectedAtDesc();
 
         if (actualDetections.isEmpty()) {
 
-            // DEMO DATA ONLY: these are not real drone detections.
-            List<DemoDetection> demoDetections = List.of(
-                    new DemoDetection(
-                            "SIM-DR01", "Simulation", "North Gate",
-                            "LOW", "OPEN", LocalDateTime.now().minusMinutes(1)),
-                    new DemoDetection(
-                            "SIM-DR02", "Simulation", "East Zone",
-                            "MEDIUM", "OPEN", LocalDateTime.now().minusMinutes(2)),
-                    new DemoDetection(
-                            "SIM-DR03", "Simulation", "South Gate",
-                            "HIGH", "OPEN", LocalDateTime.now().minusMinutes(3)),
-                    new DemoDetection(
-                            "SIM-DR04", "Simulation", "West Zone",
-                            "LOW", "CLOSED", LocalDateTime.now().minusMinutes(4)),
-                    new DemoDetection(
-                            "SIM-DR05", "Simulation", "North Gate",
-                            "MEDIUM", "OPEN", LocalDateTime.now().minusMinutes(5))
-            );
+            // DEMO ONLY: these are simulated, not real drone detections.
+            List<DemoDetection> demoDetections =
+                    generateDemoDetections();
 
             model.addAttribute("detections", demoDetections);
             model.addAttribute("detectionCount", demoDetections.size());
-            model.addAttribute("openAlerts", 4);
-            model.addAttribute("highCount", 1);
+
+            model.addAttribute(
+                    "openAlerts",
+                    (int) demoDetections.stream()
+                            .filter(d -> "OPEN".equals(d.getAlertStatus()))
+                            .count());
+
+            model.addAttribute(
+                    "highCount",
+                    (int) demoDetections.stream()
+                            .filter(d -> "HIGH".equals(d.getThreatLevel()))
+                            .count());
+
+            model.addAttribute("simulationMode", true);
 
         } else {
 
@@ -103,12 +102,16 @@ public class WebController {
                     actualDetections.stream().limit(5).toList());
 
             model.addAttribute("detectionCount", detections.count());
+
             model.addAttribute(
                     "openAlerts",
                     detections.countByAlertStatusIgnoreCase("OPEN"));
+
             model.addAttribute(
                     "highCount",
                     detections.countByThreatLevelIgnoreCase("HIGH"));
+
+            model.addAttribute("simulationMode", false);
         }
 
         model.addAttribute(
@@ -120,14 +123,59 @@ public class WebController {
         return "dashboard";
     }
 
+    // Generate five changing sample records whenever the dashboard loads.
+    private List<DemoDetection> generateDemoDetections() {
+
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
+        String[] zoneNames = {
+                "North Gate",
+                "East Zone",
+                "South Gate",
+                "West Zone"
+        };
+
+        String[] threatLevels = {"LOW", "MEDIUM", "HIGH"};
+
+        List<DemoDetection> demo = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+
+            String droneId =
+                    "SIM-DR" + random.nextInt(1000, 10000);
+
+            String zone =
+                    zoneNames[random.nextInt(zoneNames.length)];
+
+            String threat =
+                    threatLevels[random.nextInt(threatLevels.length)];
+
+            String status =
+                    random.nextBoolean() ? "OPEN" : "CLOSED";
+
+            demo.add(new DemoDetection(
+                    droneId,
+                    "Simulation",
+                    zone,
+                    threat,
+                    status,
+                    LocalDateTime.now()
+                            .minusSeconds(random.nextInt(300))
+            ));
+        }
+
+        return demo;
+    }
+
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/login?logout";
     }
 
-    // Helper classes for displaying sample data in Thymeleaf.
+    // Helper class for simulated records displayed by Thymeleaf.
     public static class DemoDetection {
+
         private final String droneId;
         private final String source;
         private final DemoZone zone;
@@ -142,6 +190,7 @@ public class WebController {
                 String threatLevel,
                 String alertStatus,
                 LocalDateTime detectedAt) {
+
             this.droneId = droneId;
             this.source = source;
             this.zone = new DemoZone(zoneName);
@@ -177,6 +226,7 @@ public class WebController {
     }
 
     public static class DemoZone {
+
         private final String name;
 
         public DemoZone(String name) {
