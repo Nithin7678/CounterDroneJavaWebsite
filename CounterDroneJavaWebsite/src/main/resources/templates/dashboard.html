@@ -1,1 +1,240 @@
-<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Counter-Drone Dashboard</title><link rel="stylesheet" href="/app.css"></head><body><main class="wrap"><header class="top"><div><div class="eyebrow">Security operations / Overview</div><h1>Counter-Drone Command Dashboard</h1><div class="muted">Welcome, <b th:text="${username}">admin</b>. Review simulated detections and threat events.</div></div><form method="post" action="/logout"><button class="btn" type="submit">Log out</button></form></header><nav class="nav"><a href="/dashboard">Dashboard</a><a href="/detections">Drone detections</a><a href="/detections/new">+ Record detection</a><a href="/alerts">Incident alerts</a><a href="/zones">Surveillance zones</a><a href="/reports">Reports &amp; statistics</a></nav><section class="stats"><div class="stat"><div class="label">Recorded detections</div><div class="num" th:text="${detectionCount}">0</div><div class="muted">Saved in database</div></div><div class="stat"><div class="label">Open alerts</div><div class="num" th:text="${openAlerts}">0</div><div class="muted">Require operator review</div></div><div class="stat"><div class="label">High threats</div><div class="num" th:text="${highCount}">0</div><div class="muted">Rule-based classification</div></div><div class="stat"><div class="label">Surveillance zones</div><div class="num" th:text="${zoneCount}">4</div><div class="muted">Configured zones</div></div></section><section class="grid"><div class="panel"><div class="top"><h2>Recent detections</h2><a class="btn primary" href="/detections/new">Add detection</a></div><div class="tablewrap"><table><thead><tr><th>DRONE ID</th><th>SOURCE</th><th>ZONE</th><th>THREAT</th><th>TIME</th></tr></thead><tbody><tr th:each="d : ${detections}"><td th:text="${d.droneId}">DR-01</td><td th:text="${d.source}">Radar</td><td th:text="${d.zone.name}">North Gate</td><td><span class="level" th:classappend="${d.threatLevel}" th:text="${d.threatLevel}">LOW</span></td><td th:text="${d.formattedTime}">time</td></tr><tr th:if="${#lists.isEmpty(detections)}"><td colspan="5" class="muted">No detections yet. Add a simulated record to begin.</td></tr></tbody></table></div></div><div class="panel"><h2>Surveillance zones</h2><div th:each="z : ${zones}" style="padding:12px 0;border-bottom:1px solid #20354b"><b th:text="${z.name}">Zone</b><p class="muted"><span th:text="${z.securityLevel}">High</span> security · <span th:text="${z.active ? 'Monitoring active' : 'Inactive'}">Monitoring active</span></p></div><p th:if="${#lists.isEmpty(zones)}" class="muted">No zones configured.</p><a class="btn" href="/zones">Manage zones</a></div></section><div class="notice"><b>Academic demo:</b> This application uses simulated records and transparent rules. It does not connect to real sensors or a trained AI model. Do not use it for real-world security decisions.</div></main></body></html>
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Counter-Drone Dashboard</title>
+
+    <link rel="stylesheet" href="/app.css">
+
+    <style>
+        body {
+            margin: 0;
+            background: #0b1220;
+            color: #e5edf7;
+            font-family: Arial, sans-serif;
+        }
+
+        .wrap {
+            max-width: 1400px;
+            margin: auto;
+            padding: 25px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 19px;
+        }
+
+        .eyebrow {
+            color: #38bdf8;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .muted {
+            color: #9caec4;
+            font-size: 14px;
+        }
+
+        .nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 25px 0;
+            padding: 15px;
+            background: #111c2d;
+            border-radius: 10px;
+        }
+
+        .nav a {
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .nav a:hover {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            border: 1px solid #334155;
+            border-radius: 7px;
+            background: #172438;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .primary {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .stat, .panel {
+            background: #111c2d;
+            border: 1px solid #26374d;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .label {
+            color: #9caec4;
+            font-size: 14px;
+        }
+
+        .num {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .tablewrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 13px 10px;
+            border-bottom: 1px solid #26374d;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .level {
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .LOW {
+            background: #14532d;
+            color: #86efac;
+        }
+
+        .MEDIUM {
+            background: #713f12;
+            color: #fde68a;
+        }
+
+        .HIGH {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .notice {
+            margin-top: 22px;
+            padding: 15px;
+            border: 1px solid #854d0e;
+            background: #292015;
+            color: #fde68a;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .zone {
+            padding: 14px 0;
+            border-bottom: 1px solid #26374d;
+        }
+
+        .status {
+            color: #86efac;
+        }
+
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .wrap {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="wrap">
+
+    <!-- HEADER -->
+    <header class="top">
+        <div>
+            <div class="eyebrow">
+                SECURITY OPERATIONS / OVERVIEW
+            </div>
+
+            <h1>Counter-Drone Command Dashboard</h1>
+
+            <div class="muted">
+                Welcome,
+                <b th:text="${username}">admin</b>
+                · Monitor simulated drone activity.
+            </div>
+        </div>
+
+        <div>
+            <button class="btn" onclick="location.reload()">
+                Refresh Dashboard
+            </button>
+
+            <form method="post" action="/logout"
+                  style="display:inline;">
+                <button class="btn" type="submit">
+                    Log Out
+                </button>
+            </form
