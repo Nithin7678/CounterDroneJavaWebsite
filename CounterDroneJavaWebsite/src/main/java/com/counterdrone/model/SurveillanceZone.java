@@ -1,15 +1,39 @@
+package com.counterdrone.model;
 
-package com.counterdrone.repository;
+import jakarta.persistence.*;
 
-import com.counterdrone.model.SurveillanceZone;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+@Entity
+@Table(name = "surveillance_zones")
+public class SurveillanceZone {
 
-import java.util.List;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@Repository
-public interface SurveillanceZoneRepository
-        extends JpaRepository<SurveillanceZone, Long> {
+    @Column(nullable = false, unique = true)
+    private String name;
 
-    List<SurveillanceZone> findAllByOrderByNameAsc();
+    private String securityLevel;
+    private boolean active = true;
+
+    public SurveillanceZone() {
+    }
+
+    public SurveillanceZone(String name, String securityLevel, boolean active) {
+        this.name = name;
+        this.securityLevel = securityLevel;
+        this.active = active;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getSecurityLevel() { return securityLevel; }
+    public void setSecurityLevel(String securityLevel) { this.securityLevel = securityLevel; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 }
