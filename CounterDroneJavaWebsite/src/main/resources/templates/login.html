@@ -1,39 +1,128 @@
+```html
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Counter-Drone | Secure Login</title>
-<style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,Segoe UI,Arial,sans-serif;background:#07111f;color:#eaf1fb;display:grid;place-items:center;padding:22px}
-.shell{width:min(100%,980px);min-height:570px;display:grid;grid-template-columns:1.05fr .95fr;border:1px solid #23364d;border-radius:24px;overflow:hidden;background:#0c1929;box-shadow:0 25px 80px #0008}
-.hero{padding:48px;background:radial-gradient(circle at 20% 10%,#1d5367 0,transparent 38%),linear-gradient(145deg,#10283b,#091522);display:flex;flex-direction:column;justify-content:space-between}
-.brand{display:flex;gap:12px;align-items:center;font-weight:750;letter-spacing:.4px}.logo{width:42px;height:42px;border-radius:13px;background:#19b7a5;display:grid;place-items:center;color:#061620;font-size:23px}
-.kicker{color:#50d8c8;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800;margin-top:75px}
-h1{font-size:38px;line-height:1.12;margin:14px 0}.hero p{color:#a9bdd0;line-height:1.7;max-width:380px}
-.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}.pill{font-size:11px;border:1px solid #345267;border-radius:99px;padding:8px 11px;color:#b7ccdc}
-.footer{font-size:11px;color:#7890a6}.formside{padding:50px 44px;display:flex;flex-direction:column;justify-content:center}
-.eyebrow{font-size:12px;color:#7e9ab3;text-transform:uppercase;letter-spacing:1.6px}.formside h2{font-size:28px;margin:10px 0}.sub{color:#9bb0c3;font-size:14px;margin-bottom:28px}
-label{display:block;font-size:13px;color:#c4d3e2;margin:17px 0 8px}input{width:100%;padding:14px 15px;background:#081421;border:1px solid #2a4057;border-radius:10px;color:#fff;font-size:14px;outline:none}input:focus{border-color:#22c5b4;box-shadow:0 0 0 3px #22c5b41c}
-button{width:100%;margin-top:24px;border:0;border-radius:10px;padding:14px;background:#20c4b1;color:#061620;font-size:14px;font-weight:800;cursor:pointer}button:hover{background:#47dac9}
-.err{background:#431e2a;color:#ffc3ce;border:1px solid #733145;border-radius:9px;padding:10px;font-size:13px}.demo{margin-top:22px;padding:14px;border:1px solid #24394e;background:#0a1624;border-radius:10px;font-size:12px;color:#a8bdce;line-height:1.8}.demo strong{color:#e3edf6}
-@media(max-width:700px){.shell{grid-template-columns:1fr}.hero{padding:28px;min-height:270px}.kicker{margin-top:35px}h1{font-size:30px}.formside{padding:32px 26px}}
-</style></head>
-<body><main class="shell">
-<section class="hero">
-  <div><div class="brand"><div class="logo">⌁</div><div>COUNTER-DRONE <span style="color:#52d7c8">OPS</span></div></div>
-  <div class="kicker">Command &amp; threat management</div>
-  <h1>Airspace awareness.<br>One command view.</h1>
-  <p>A Java-based demonstration portal for simulated drone detections, threat levels, restricted zones and incident coordination.</p>
-  <div class="pills"><span class="pill">● Secure sign-in demo</span><span class="pill">Threat monitoring</span><span class="pill">Incident overview</span></div></div>
-  <div class="footer">ACADEMIC MICROPROJECT · SIMULATED DATA ONLY</div>
-</section>
-<section class="formside">
-  <div class="eyebrow">Operator access</div><h2>Welcome back</h2><div class="sub">Sign in to open the monitoring dashboard.</div>
-  <div th:if="${error}" class="err" th:text="${error}"></div>
-  <form method="post" action="/login">
-    <label for="username">Username</label><input id="username" name="username" autocomplete="username" placeholder="Enter username" required>
-    <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter password" required>
-    <button type="submit">Sign in to dashboard →</button>
-  </form>
-  <div class="demo"><strong>Demo login credentials</strong><br>Administrator: <strong>admin</strong> / <strong>Drone@123</strong><br>Operator: <strong>operator</strong> / <strong>Secure@123</strong></div>
-</section></main></body></html>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Counter-Drone | Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #071426, #102d4a, #071426);
+            color: #ffffff;
+        }
+
+        .login-container {
+            width: 90%;
+            max-width: 420px;
+            padding: 35px;
+            background: #102238;
+            border: 1px solid #29465f;
+            border-radius: 15px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 25px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a9bfd2;
+            font-size: 14px;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #dce8f2;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #3a5871;
+            border-radius: 7px;
+            background: #091827;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #38bdf8;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #1685d1;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0874bb;
+        }
+
+        .error {
+            background: #54252b;
+            color: #ffb8bd;
+            padding: 10px;
+            margin-bottom: 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #8fa8bd;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <div class="logo">🛡️</div>
+
+        <h1>Counter-Drone System</h1>
+
+        <p class="subtitle">
+            Threat Detection and Management Dashboard
+            <br>
+            Sign in to access the
